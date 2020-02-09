@@ -1,0 +1,804 @@
+library(polynom)
+
+.tridiagonal_determinant <- function(n, a, b) {
+  result <- array(0, n + 1)
+  result[1] = 1
+  result[2] = b
+  for (i in 3:(n + 1)) {
+    result[i] <- (b * result[i - 1]) - (a * a * result[i - 2])
+  }
+  return(result)
+}
+
+.tridiagonal_inverse <- function(n, a, b, determinant) {
+  Inv <- matrix(0, nrow = n, ncol = n)
+  if (n == 1) {
+    Inv[1, 1] <- (1 / b)
+    return(Inv)
+  }
+
+  Inv[1, n] <-
+    ((-1) ^ (1 + n)) * (a ^ (n - 1)) / determinant[n + 1]
+  Inv[n, 1] <- Inv[1, n]
+  for (j in 1:(n - 1)) {
+    Inv[n - j + 1, n] <- ((-1) ^ (n + j)) * Inv[1, n] *
+      (a ^ (j - n)) * determinant[n - j + 1]
+    Inv[1, j] <- Inv[n - j + 1, n]
+    Inv[n, n - j + 1] <- Inv[n - j + 1, n]
+    Inv[j, 1] <- Inv[n - j + 1, n]
+  }
+
+
+  s <- 0
+  for (j in (n - 1):((n + (n %% 2)) / 2)) {
+    s <- s + 1
+    for (i in (n + 1 - j):(n - s)) {
+      if (s + 1 - j <= 0) {
+        Inv[i, j] <- (Inv[i + 1, j + 1] + Inv[i + j -
+                                                n, n])
+        Inv[j, i] <- Inv[i, j]
+        Inv[n - i + 1, n - j + 1] <- Inv[i, j]
+        Inv[n - j + 1, n - i + 1] <- Inv[i, j]
+      }
+    }
+  }
+  return(Inv)
+}
+
+#' Construct inverse of a tridiagonal matrix T_n(a,b,a).
+#'
+#' \code{tridiag_inv_unif_by_sums} constructs inverse of a regular tridiagonal matrix \code{T}_{\code{n}}(\code{a},\code{b},\code{a})
+#' with constant entries by a special algorithm using sums of matrix elements.
+#'
+#' @param n an order of given tridiagonal matrix.
+#' @param a a value of tridiagonal matrix elements that are off-diagonal.
+#' @param b a value of tridiagonal matrix diagonal elements.
+#' @return The inverse of matrix \code{T}_{\code{n}}(\code{a},\code{b},\code{a}).
+#' @examples
+#' tridiag_inv_unif_by_sums(5, 1, 4)
+#' tridiag_inv_unif_by_sums(9, 10, -1)
+#' @export
+tridiag_inv_unif_by_sums <- function(n, a, b) {
+  if (n %% 1 != 0 || n <= 0) {
+    stop("n is not a positive integer!")
+  }
+  if (!is.numeric(a) || !is.numeric(b)) {
+    stop("a or b are not numeric!")
+  }
+  if (n == 1 && b == 0) {
+    stop("The matrix is not invertible.")
+  }
+
+  det <- .tridiagonal_determinant(n, a, b)
+
+  return (.tridiagonal_inverse(n, a, b, det))
+}
+
+#' Construct inverse of a general tridiagonal matrix.
+#'
+#' \code{tridiag_inv_general} constructs inverse of a general tridiagonal matrix \code{T} of order \code{n},
+#' using Usmani's theorem.
+#'
+#' @param T a tridiagonal matrix.
+#' @param n an order of given tridiagonal matrix.
+#' @return The inverse of matrix T.
+#' @examples
+#'
+#' tridiag_inv_general(matrix(c(1,3,5,-2,0,8,7,6,6),3,3),3)
+#' tridiag_inv_general(matrix(c(1,4,0,-9),2,2),2)
+#' @export
+tridiag_inv_general <- function(T, n) {
+  if (!is.matrix(T)) {
+    stop("T is not a matrix!")
+  }
+  if (n == 1) {
+    return(matrix((1 / T[1, 1]), 1, 1))
+  }
+  if (n %% 1 != 0 || n <= 0) {
+    stop("n is not a positive integer!")
+  }
+  if (det(T) == 0) {
+    stop("Matrix T is not invertible!")
+  }
+
+  a <- rep(0, n - 1)
+  b <- rep(0, n)
+  c <- rep(0, n - 1)
+  for (i in 1:(n - 1)) {
+    b[i] <- T[i, i]
+    c[i] <- T[i, i + 1]
+    a[i] <- T[i + 1, i]
+  }
+  b[n] <- T[n, n]
+
+  theta <- rep(0, n + 1)
+  phi <- rep(0, n + 1)
+  theta[1] <- 1
+  theta[2] <- b[1]
+  for (i in 3:(n + 1)) {
+    theta[i] <- b[i - 1] * theta[i - 1] - a[i - 2] * c[i -
+                                                         2] * theta[i - 2]
+  }
+  phi[n + 1] <- 1
+  phi[n] <- b[n]
+  for (i in (n - 1):1) {
+    phi[i] <- b[i] * phi[i + 1] - a[i] * c[i] * phi[i +
+                                                      2]
+  }
+  Tau <- matrix(0, nrow = n, ncol = n)
+  for (i in 1:n) {
+    for (j in 1:n) {
+      if (i < j) {
+        Tau[i, j] <-
+          ((-1) ^ (i + j)) * prod(c[i:(j - 1)]) * theta[i] * phi[j + 1] / theta[n + 1]
+      } else if (i > j) {
+        Tau[i, j] <-
+          ((-1) ^ (i + j)) * prod(a[j:(i - 1)]) * theta[j] * phi[i + 1] / theta[n + 1]
+      } else {
+        Tau[i, j] <- theta[i] * phi[i + 1] / theta[n + 1]
+      }
+    }
+  }
+
+  return(Tau)
+}
+
+#' Construct 4 Hermite basis functions.
+#'
+#' \code{hermite_bf_matrix} constructs matrix of Hermite basis functions' coefficients on
+#' [\code{u},\code{v}], that is the matrix of 4 cubic polynomials' coefficients of
+#' one-component Hermite cubic spline.
+#'
+#' @param u a left border of interval [\code{u},\code{v}].
+#' @param v a right border of interval [\code{u},\code{v}], \code{u}\eqn{\le}\code{v}.
+#' @return The matrix of 4 Hermite basis functions' coefficients.
+#' @examples
+#'
+#' hermite_bf_matrix(0,1)
+#' hermite_bf_matrix(-2,3)
+#' @export
+hermite_bf_matrix <- function(u, v) {
+  if (!is.numeric(u) || !is.numeric(v)) {
+    stop("u or v are not numeric!")
+  }
+  if (u >= v) {
+    stop("Badly chosen knots!")
+  }
+  bf_matrix <- matrix(0, 4, 4)
+  h <- v - u
+  hh <- v + u
+  bf_matrix[1, 1] <- -3 * u * v ^ 2 + v ^ 3
+  bf_matrix[1, 2] <- 3 * v * u ^ 2 - u ^ 3
+  bf_matrix[1, 3] <- -u * v ^ 2 * h
+  bf_matrix[1, 4] <- -u ^ 2 * v * h
+  bf_matrix[2, 1] <- 6 * u * v
+  bf_matrix[2, 2] <- -6 * u * v
+  bf_matrix[2, 3] <- (2 * u * v + v ^ 2) * h
+  bf_matrix[2, 4] <- (u ^ 2 + 2 * u * v) * h
+  bf_matrix[3, 1] <- -3 * (hh)
+  bf_matrix[3, 2] <- 3 * (hh)
+  bf_matrix[3, 3] <- (-2 * v - u) * h
+  bf_matrix[3, 4] <- (-2 * u - v) * h
+  bf_matrix[4, 1] <- 2
+  bf_matrix[4, 2] <- -2
+  bf_matrix[4, 3] <- h
+  bf_matrix[4, 4] <- h
+  return(bf_matrix / (h ^ 3))
+}
+
+.uniform_auxiliary_matrix_a <- function(n, h, Tau) {
+  A <- matrix(0, n, (n + 4))
+  if (n == 1) {
+    A[1, 1] <- -3 / (4 * h)
+    A[1, 2] <- 0
+    A[1, 3] <- 3 / (4 * h)
+    A[1, 4] <- -1 / 4
+    A[1, 5] <- -1 / 4
+  } else {
+    for (i in 1:n) {
+      for (j in 1:(n + 4)) {
+        if (j == 1 || j == 2) {
+          A[i, j] <- -Tau[i, j] * (3 / h)
+        } else if (j > 2 && j < (n + 1)) {
+          A[i, j] <- (Tau[i, j - 2] - Tau[i, j]) * (3 / h)
+        } else if (j == n + 1 || j == n + 2) {
+          A[i, j] <- Tau[i, j - 2] * (3 / h)
+        } else if (j == n + 3) {
+          A[i, j] <- -Tau[i, 1]
+        } else {
+          A[i, j] <- -Tau[i, n]
+        }
+      }
+    }
+  }
+  return (A)
+}
+
+.basis_matrices <- function(n, uu) {
+  vec_mat <- array(0, c(4, 4, (n + 1)))
+  for (i in 1:(n + 1)) {
+    m <- hermite_bf_matrix(uu[i], uu[i + 1])
+    vec_mat[, , i] <- m
+  }
+  return (vec_mat)
+}
+
+.basis_functions <- function(n, uu) {
+  vec_mat <- .basis_matrices(n, uu)
+  BF <- array(dim = c(n + 1, 4, 4))
+  for (i in 1:(n + 1)) {
+    BF[i, 1, ] <- vec_mat[, , i][, 1]
+    BF[i, 2, ] <- vec_mat[, , i][, 2]
+    BF[i, 3, ] <- vec_mat[, , i][, 3]
+    BF[i, 4, ] <- vec_mat[, , i][, 4]
+  }
+  return (BF)
+}
+
+.uniform_auxiliary_matrix_b <- function(n, A, BF) {
+  B <- array(dim = c(n + 1, n + 4, 4))
+  B[1, 1, ] <- BF[1, 1, ] + (A[1, 1] * BF[1, 4, ])
+  B[1, 2, ] <- BF[1, 2, ] + (A[1, 2] * BF[1, 4, ])
+  for (i in 3:(n + 2)) {
+    B[1, i, ] <- A[1, i] * BF[1, 4, ]
+  }
+  B[1, n + 3, ] <- BF[1, 3, ] + (A[1, n + 3] * BF[1, 4, ])
+  B[1, n + 4, ] <- A[1, n + 4] * BF[1, 4, ]
+  if (n >= 2) {
+    for (i in 2:n) {
+      for (j in 1:(n + 4)) {
+        if (i == j) {
+          B[i, j, ] <- BF[i, 1, ] + A[i - 1, j] * BF[i,
+                                                     3, ] + A[i, j] * BF[i, 4, ]
+        } else if (i == j - 1) {
+          B[i, j, ] <- BF[i, 2, ] + A[i - 1, j] * BF[i,
+                                                     3, ] + A[i, j] * BF[i, 4, ]
+        } else {
+          B[i, j, ] <- A[i - 1, j] * BF[i, 3, ] + A[i,
+                                                    j] * BF[i, 4, ]
+        }
+      }
+    }
+  }
+  for (i in 1:n) {
+    B[n + 1, i, ] <- A[n, i] * BF[n + 1, 3, ]
+  }
+  B[n + 1, n + 1, ] <- BF[n + 1, 1, ] + A[n, n + 1] * BF[n +
+                                                           1, 3, ]
+  B[n + 1, n + 2, ] <- BF[n + 1, 2, ] + A[n, n + 2] * BF[n +
+                                                           1, 3, ]
+  B[n + 1, n + 3, ] <- A[n, n + 3] * BF[n + 1, 3, ]
+  B[n + 1, n + 4, ] <- BF[n + 1, 4, ] + A[n, n + 4] * BF[n +
+                                                           1, 3, ]
+  return(B)
+}
+
+.explicit_spline <- function(n, B, gamma) {
+  expl_spline <- array(0, c(n + 1, 1, 4))
+  for (i in 1:(n + 1)) {
+    pom <- array(0, c(1, 1, 4))
+    for (j in 1:(n + 4)) {
+      pom <- pom + gamma[j] * B[i, j, ]
+    }
+    expl_spline[i, 1, ] <- pom
+  }
+  return (expl_spline)
+}
+
+.create_polynomial <- function(n, uu, expl_spline, clrs) {
+  pL <- list(polynomial(1))
+  for (j in 2:(n + 1))
+    pL[[j]] <- 1 + pL[[j - 1]]
+  class(pL) <- "polylist"
+  for (i in 1:(n + 1)) {
+    pL[[i]] <- polynomial(coef = c(expl_spline[i, 1, ]))
+    frb = ifelse(i %% 2 == 0, clrs[2], clrs[1])
+    lines(pL[[i]], xlim = c(uu[i], uu[i + 1]), col = frb)
+  }
+  return (pL)
+}
+
+#' Construct the explicit form of uniform clamped interpolating cubic spline (UcICS).
+#'
+#' \code{cics_unif_explicit} constructs the explicit form of uniform clamped interpolating cubic spline
+#' (via Hermite cubic spline) for knots \code{uu}, function values \code{yy} and exterior-knot derivatives
+#' \code{d}.
+#'
+#' @param uu a vector of equidistant knots (ordered ascendingly), with magnitude \code{n+2}, \code{n}\eqn{\ge}\code{1}.
+#' @param yy a vector of function values pertaining to knots in \code{uu}.
+#' @param d a vector of two values of derivative, in the first and the last knot of \code{uu}.
+#' @param clrs a vector (optional parameter) of colours that are used alternately to plot the graph of spline's components.
+#' @param xlab a title (optional parameter) for the \code{x} axis.
+#' @param ylab a title (optional parameter) for the \code{y} axis.
+#' @param title a title (optional parameter) for the plot.
+#' @return a list of spline components
+#' \item{spline}{matrix, whose \code{i}-th row contains coefficients of uniform ICS's \code{i}-th component.}
+#' \item{spline_toPolynomial}{list of UcICS's components string representations.}
+#' \item{B}{\code{4}-element array of \code{(n+1)x(n+4)} matrices, whereas element in \code{i}-th row
+#' and \code{j}-th column of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial that is in \code{i}-th row
+#' and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.\gamma.}}
+#' \item{gama}{\eqn{\gamma=} vector of spline coefficients - function values and exterior-knot derivatives that
+#'  takes part in the explicit form \eqn{S=B.\gamma}.}
+#' @examples
+#'
+#' cics_unif_explicit(CERN$x,CERN$y,c(0,0), xlab="X axis", ylab="Y axis")
+#'
+#' @export
+#' @importFrom grDevices colours
+#' @importFrom graphics plot
+#' @importFrom graphics lines
+#' @import polynom
+cics_unif_explicit <-
+  function(uu,
+           yy,
+           d,
+           clrs = c('blue', 'red'),
+           xlab = NULL,
+           ylab = NULL,
+           title = "Spline") {
+    if (is.unsorted(uu)) {
+      stop("Knots are not in increasing order!")
+    }
+    if (length(uu) != length(yy)) {
+      stop("Lengths of knot sequence and
+                  sequence of function values differ!")
+    }
+    if (length(uu) <= 2) {
+      stop("There are not at least 3 knots.")
+    }
+    dist <- (uu[length(uu)] - uu[1]) / (length(uu) - 1)
+    for (i in 1:(length(uu) - 1)) {
+      if (!all.equal(uu[i + 1] - uu[i], dist)) {
+        stop("Knots are not equidistant!")
+      }
+    }
+    if (length(d) != 2) {
+      stop("d isn't of length 2.")
+    }
+    if (!all(clrs %in% colours())) {
+      stop("Not every string in clrs represents a colour!")
+    }
+    n <- length(uu) - 2
+    gam <- c(yy, d)
+    Tau <- tridiag_inv_unif_by_sums(n, 1, 4)
+    h <- (uu[length(uu)] - uu[1]) / (n + 1)
+
+    A <- .uniform_auxiliary_matrix_a(n, h, Tau)
+    BF <- .basis_functions(n, uu)
+    B <- .uniform_auxiliary_matrix_b(n, A, BF)
+    expl_spline <- .explicit_spline(n, B, gam)
+
+    pp <-
+      plot(
+        uu,
+        yy,
+        type = "p",
+        pch = 20,
+        col = "black",
+        bg = "black",
+        xlab = xlab,
+        ylab = ylab,
+        main = title
+      )
+
+    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+
+    list(
+      spline = expl_spline[, , ],
+      spline_polynomial = pL,
+      B = B,
+      gamma = gam,
+      aux_BF = BF,
+      aux_A = A,
+      aux_tridiag_inverse = Tau
+    )
+  }
+
+.coordinate_indices <- function(lngth, k, uu, xx) {
+  xx_idx <- c(rep(0, lngth))
+
+  for (i in 1:lngth) {
+    for (j in 1:(k - 1)) {
+      if (uu[j] <= xx[i] && xx[i] < uu[j + 1]) {
+        xx_idx[i] <- j
+      }
+      if (uu[k] <= xx[i] && xx[i] <= uu[k + 1]) {
+        xx_idx[i] <- k
+      }
+    }
+  }
+  return (xx_idx)
+}
+
+.auxiliary_estimation_matrix <- function(lngth, k, xx, B, xx_idx) {
+  M <- matrix(0, lngth, k + 3)
+  for (i in 1:lngth) {
+    for (j in 1:(k + 3)) {
+      sup_poly <- B[xx_idx[i], j, ]
+      M[i, j] <- sup_poly[1] + sup_poly[2] * xx[i] + sup_poly[3] *
+        (xx[i]) ^ 2 + sup_poly[4] * (xx[i]) ^ 3
+    }
+  }
+  return (M)
+}
+
+.estimate_gamma <- function(k, d, yy, M) {
+  if (missing(d)) {
+    MT <- t(M)
+    XX <- MT %*% M
+    XY <- MT %*% yy
+    est_gam <- t(solve(XX)) %*% XY
+  } else {
+    if (length(d) != 2) {
+      stop("d isn't a numeric vector of length 2.")
+    }
+    M1 <- M[, 1:(k + 1)]
+    M2 <- M[, (k + 2):(k + 3)]
+    yy_new <- yy - (M2 %*% d)
+    M1T <- t(M1)
+    XX1 <- M1T %*% M1
+    XY1 <- M1T %*% yy_new
+    est_gam_fv <- t(solve(XX1)) %*% XY1
+    est_gam <- c(est_gam_fv, d)
+  }
+  return(est_gam)
+}
+
+#' Smooth given data set by k-component uniform clamped interpolating spline (UcICS).
+#'
+#' \code{cics_unif_explicit_smooth} constructs the uniform clamped interpolating spline with \code{k} components that smoothes
+#'  given data set \code{{(xx[i],yy[i]), i=1..length(xx)}}.
+#'
+#' @param xx a vector of data set's \code{x}-coordinates (that are in increasing order).
+#' @param yy a vector of datanvidi set's \code{y}-coordinates.
+#' @param k a chosen number of components of smoothing UcICS (integer \eqn{\ge 2}).
+#' @param clrs a vector of colours that are used alternately to plot the graph of spline's components.
+#' @param d a vector (optional parameter) that contains two values of derivative, in the first and the last
+#'  computed knot. If missing, values of derivative are estimated by given linear regression model. If present, their
+#'  contribution is removed from linear model and only function values are estimated.
+#' @param xlab a title (optional parameter) for the \code{x} axis.
+#' @param ylab a title (optional parameter) for the \code{y} axis.
+#' @param title a title (optional parameter) for the plot.
+#' @return a list with components
+#' \item{knots}{vector of equidistant knots, based on which we construct the smoothing spline.}
+#' \item{smoothing_spline}{\code{4}-element array of \code{(k)x(k+3)} matrices, whereas element in \code{i}-th row and \code{j}-th
+#'  of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial, which is in \code{i}-th row and \code{j}-th column  of matrix
+#' \code{B} from smoothing spline's explicit form \deqn{S=B.\gamma.}}
+#' \item{smoothing_spline_toPolynomial}{list of string representations of smoothing UcICS.}
+#' \item{est_gamma}{vector of estimated smoothing spline's coefficients (function values and exterior-knot derivatives).}
+#' @examples
+#'
+#' cics_unif_explicit_smooth(c(0,sort(runif(18, 0, 1)),1),
+#' c(rgamma(20,shape=1)),3,c('magenta','orange'))
+#' cics_unif_explicit_smooth(c(0,sort(runif(98, 0, 15)),15),
+#' c(rnorm(100, 0, 0.01)),10,c('blue','red'))
+#'
+#' cics_unif_explicit_smooth(
+#' xx = CERN$x,
+#' yy = CERN$y,
+#' k = 21,
+#' d = c(0, 1),
+#' xlab = "X axis",
+#' ylab = "Y axis"
+#' )
+#'
+#' @export
+#' @importFrom grDevices colours
+#' @importFrom graphics plot
+#' @importFrom graphics lines
+#' @import polynom
+cics_unif_explicit_smooth <-
+  function(xx,
+           yy,
+           k,
+           clrs = c('blue', 'red'),
+           d,
+           xlab = NULL,
+           ylab = NULL,
+           title = "Title") {
+    if (is.unsorted(xx)) {
+      stop("x-coordinates of measurements are not in increasing order!")
+    }
+    if (length(xx) != length(yy)) {
+      stop("Lengths of x-coordinate and y-coordinate sequences differ!")
+    }
+    if (!all(clrs %in% colours())) {
+      stop("Not every string in clrs represents a colour!")
+    }
+    if (k < 2) {
+      stop("k is either not greater or equal to 2.")
+    }
+    lngth <- length(xx)
+    n <- k - 1
+    uu <- c(seq(xx[1], xx[length(xx)], length.out = k + 1))
+    h <- (xx[length(xx)] - xx[1]) / k
+    Tau <- tridiag_inv_unif_by_sums(n, 1, 4)
+
+    A <- .uniform_auxiliary_matrix_a(n, h, Tau)
+    BF <- .basis_functions(n, uu)
+    B <- .uniform_auxiliary_matrix_b(n, A, BF)
+
+    xx_idx <- .coordinate_indices(lngth, k, uu, xx)
+
+    M <- .auxiliary_estimation_matrix(lngth, k, xx, B, xx_idx)
+    est_gam <- .estimate_gamma(k, d, yy, M)
+    expl_spline <- .explicit_spline(n, B, est_gam)
+
+    pp <- plot(
+      xx,
+      yy,
+      type = "p",
+      pch = 20,
+      cex = 0.2,
+      col = "black",
+      bg = "black",
+      xlab = xlab,
+      ylab = ylab,
+      main = title
+    )
+
+    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+
+    list(
+      knots = uu,
+      smoothing_spline = expl_spline[, , ],
+      smoothing_spline_polynomial = pL,
+      est_gamma = est_gam,
+      B = B,
+      aux_BF = BF,
+      aux_A = A,
+      aux_tridiag_inverse = Tau,
+      aux_M = M
+    )
+  }
+
+.nonuniform_tridiagonal_inverse_matrix <- function(n, i, hh) {
+  T <- matrix(0, n, n)
+  if (n > 1) {
+    for (i in 1:(n - 1)) {
+      T[i, i] <- (2 / hh[i]) + (2 / hh[i + 1])
+      T[i, i + 1] <- (1 / hh[i + 1])
+      T[i + 1, i] <- (1 / hh[i + 1])
+    }
+  }
+  T[n, n] <- (2 / hh[n]) + (2 / hh[n + 1])
+  Tau <- tridiag_inv_general(T, n)
+  return (Tau)
+}
+
+.nonuniform_auxiliary_matrix_a <- function(n, hh, j, i, Tau) {
+  A <- matrix(0, n, n + 4)
+  if (n == 1) {
+    A[1, 1] <- -3 * hh[2] / (2 * hh[1] * (hh[1] + hh[2]))
+    A[1, 2] <- 3 * (hh[2] - hh[1]) / (2 * hh[1] * hh[2])
+    A[1, 3] <- 3 * hh[1] / (2 * hh[2] * (hh[1] + hh[2]))
+    A[1, 4] <- -hh[2] / (2 * (hh[1] + hh[2]))
+    A[1, 5] <- -hh[1] / (2 * (hh[1] + hh[2]))
+  } else {
+    for (i in 1:n) {
+      for (j in 1:(n + 4)) {
+        if (j == 1) {
+          A[i, j] <- (-3 * Tau[i, 1] / (hh[1] ^ 2))
+        } else if (j == 2) {
+          A[i, j] <- (3 * Tau[i, 1] / hh[1] ^ 2) - (3 * Tau[i,
+                                                            1] / hh[2] ^ 2) - (3 * Tau[i, 2] / hh[2] ^ 2)
+        } else if (j > 2 && j < n + 1) {
+          A[i, j] <- (3 * Tau[i, j - 2] / hh[j - 1] ^ 2) +
+            (3 * Tau[i, j - 1] / hh[j - 1] ^ 2) - (3 * Tau[i,
+                                                           j - 1] / hh[j] ^ 2) - (3 * Tau[i, j] / hh[j] ^ 2)
+        } else if (j == n + 1) {
+          A[i, j] <- (3 * Tau[i, n - 1] / hh[n] ^ 2) + (3 *
+                                                          Tau[i, n] / hh[n] ^ 2) - (3 * Tau[i, n] / hh[n +
+                                                                                                         1] ^ 2)
+        } else if (j == n + 2) {
+          A[i, j] <- (3 * Tau[i, n] / hh[n + 1] ^ 2)
+        } else if (j == n + 3) {
+          A[i, j] <- (-Tau[i, 1] / hh[1])
+        } else {
+          A[i, j] <- (-Tau[i, n] / hh[n + 1])
+        }
+      }
+    }
+  }
+  return (A)
+}
+
+#' Construct the explicit form of non-uniform clamped interpolating cubic spline (NcICS).
+#'
+#' \code{cics_explicit} constructs the explicit form of non-uniform clamped interpolating cubic spline
+#' (via Hermite cubic spline) for knots \code{uu}, function values \code{yy} and exterior-knot derivatives
+#' \code{d}.
+#'
+#' @param uu a vector of arbitrary knots (ordered ascendingly), with magnitude \code{n+2}, \code{n}\eqn{\ge}\code{1}.
+#' @param yy a vector of function values pertaining to knots in \code{uu}.
+#' @param d a vector of two values of derivative, in the first and the last knot of \code{uu}.
+#' @param clrs a vector of colours that are used alternately to plot the graph of spline's components.
+#' @param xlab a title (optional parameter) for the \code{x} axis.
+#' @param ylab a title (optional parameter) for the \code{y} axis.
+#' @param title a title (optional parameter) for the plot.
+#' @return a list with components
+#' \item{spline}{matrix, whose \code{i}-th row contains coefficients of non-uniform ICS's \code{i}-th component.}
+#' \item{spline_toPolynomial}{list of NcICS's components string representations.}
+#' \item{B}{\code{4}-element array of \code{(n+1)x(n+4)} matrices, whereas element in \code{i}-th row
+#' and \code{j}-th column of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial that is in \code{i}-th row
+#' and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.\gamma.}}
+#' \item{gama}{\eqn{\gamma=} vector of spline coefficients - function values and exterior-knot derivatives that
+#'  takes part in the explicit form \eqn{S=B.\gamma}.}
+#' @examples
+#'
+#' cics_explicit(c(0,2,7),c(4,5,-1),c(0,-2),c('blue','red'))
+#' cics_explicit(c(-2,-1,3,10,13),c(-5,-4,2,5,2),c(1,-3),c('green','yellow'))
+#' cics_explicit(CERN[,1],CERN[,2], d=c(0,-2), xlab="X axis", ylab="Y axis")
+#' @export
+#' @importFrom grDevices colours
+#' @importFrom graphics plot
+#' @importFrom graphics lines
+#' @import polynom
+cics_explicit <-
+  function(uu,
+           yy,
+           d,
+           clrs = c('blue', 'red'),
+           xlab = NULL,
+           ylab = NULL,
+           title = "Spline") {
+    if (is.unsorted(uu)) {
+      stop("Knots are not in increasing order!")
+    }
+    if (length(uu) != length(yy)) {
+      stop("Lengths of knot sequence and
+                  sequence of function values differ!")
+    }
+    if (length(uu) <= 2) {
+      stop("There should be at least 3 knots.")
+    }
+    if (length(d) != 2) {
+      stop("d isn't of length 2.")
+    }
+    if (!all(clrs %in% colours())) {
+      stop("Not every string in clrs represents a colour!")
+    }
+    n <- length(uu) - 2
+    hh <- c(uu[2:length(uu)] - uu[1:(length(uu) - 1)])
+    gam <- c(yy, d)
+    Tau <- .nonuniform_tridiagonal_inverse_matrix(n, i, hh)
+
+    A <- .nonuniform_auxiliary_matrix_a(n, hh, j, i, Tau)
+    vec_mat <- .basis_matrices(n, uu)
+
+    BF <- .basis_functions(n, uu)
+    B <- .uniform_auxiliary_matrix_b(n, A, BF)
+    expl_spline <- .explicit_spline(n, B, gam)
+
+    pp <-
+      plot(
+        uu,
+        yy,
+        type = "p",
+        pch = 20,
+        col = "black",
+        bg = "black",
+        xlab = xlab,
+        ylab = ylab,
+        main = title
+      )
+    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+
+    list(
+      spline = expl_spline[, , ],
+      spline_polynomial = pL,
+      B = B,
+      gama = gam,
+      aux_BF = BF,
+      aux_A = A,
+      aux_tridiag_inverse = Tau
+    )
+  }
+
+#' Smooth given data set by k-component non-uniform clamped interpolating spline (NcICS).
+#'
+#' \code{cics_explicit_smooth} constructs the non-uniform clamped interpolating spline with \code{k}
+#'  components that smoothes
+#'  given data set \code{{(xx[i],yy[i]), i=1..length(xx)}}.
+#'
+#' @param xx a vector of data set's \code{x}-coordinates (that are in increasing order).
+#' @param yy a vector of data set's \code{y}-coordinates.
+#' @param uu a vector of arbitrary knots, based on which we construct the smoothing spline. uu[1] and uu[length(uu)] must be equal to xx[1] and xx[length(xx)], respectively.
+#' @param clrs a vector of colours that are used alternately to plot the graph of spline's components.
+#' @param d a vector (optional parameter) that contains two values of derivative, in the first and the last
+#'  knot from \code{uu}. If missing, values of derivative are estimated by given linear regression model. If present, their
+#'  contribution is removed from linear model and only function values are estimated.
+#' @param xlab a title (optional parameter) for the \code{x} axis.
+#' @param ylab a title (optional parameter) for the \code{y} axis.
+#' @param title a title (optional parameter) for the plot.
+#' @return a list with components
+#' \item{smoothing_spline}{\code{4}-element array of \code{(k)x(k+3)} matrices, whereas element in \code{i}-th row and \code{j}-th
+#'  of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial, which is in \code{i}-th row and \code{j}-th column  of matrix
+#' \code{B} from smoothing spline's explicit form \deqn{S=B.\gamma.}}
+#' \item{smoothing_spline_toPolynomial}{list of string representations of smoothing NcICS.}
+#' \item{est_gamma}{vector of estimated smoothing spline's coefficients (function values and exterior-knot derivatives).}
+#' @examples
+#'
+#' cics_explicit_smooth(c(0,sort(runif(28, 0, 1)),1),c(rgamma(30,shape=1)),
+#' c(0,sort(runif(3,0,1)),1),c('green','yellow'))
+#' cics_explicit_smooth(c(0,sort(runif(98, 0, 1)),1),c(rnorm(100, 0, 0.01)),
+#' c(0,sort(runif(9,0,1)),1),c('blue','red'))
+#'
+#' cics_explicit_smooth(
+#' xx = CERN[,1],
+#' yy = CERN[,2],
+#' d = c(0, 1),
+#' uu = c(1, sort(runif(20,1,277)), 277),
+#' xlab = "X axis",
+#' ylab = "Y axis"
+#' )
+#' @export
+#' @importFrom grDevices colours
+#' @importFrom graphics plot
+#' @importFrom graphics lines
+#' @import polynom
+cics_explicit_smooth <-
+  function(xx,
+           yy,
+           uu,
+           clrs = c('blue', 'red'),
+           d ,
+           xlab = NULL,
+           ylab = NULL,
+           title = "Spline") {
+    k <- length(uu) - 1
+    if (is.unsorted(xx)) {
+      stop("x-coordinates of measurements are not in increasing order!")
+    }
+    if (is.unsorted(uu)) {
+      stop("Knots uu are not in increasing order!")
+    }
+    if (length(xx) != length(yy)) {
+      stop("Lengths of x-coordinate and y-coordinate sequences differ!")
+    }
+    if (!all(clrs %in% colours())) {
+      stop("Not every string in clrs represents a colour!")
+    }
+    if (k < 2) {
+      stop("k is not greater or equal to 2.")
+    }
+    lngth <- length(xx)
+    n <- length(uu) - 2
+    hh <- c(uu[2:length(uu)] - uu[1:(length(uu) - 1)])
+    Tau <- .nonuniform_tridiagonal_inverse_matrix(n, i, hh)
+
+    A <- .nonuniform_auxiliary_matrix_a(n, hh, j, i, Tau)
+
+    vec_mat <- .basis_matrices(n, uu)
+    BF <- .basis_functions(n, uu)
+    B <- .uniform_auxiliary_matrix_b(n, A, BF)
+
+    xx_idx <- .coordinate_indices(lngth, k, uu, xx)
+
+    M <- .auxiliary_estimation_matrix(lngth, k, xx, B, xx_idx)
+    est_gam <- .estimate_gamma(k, d, yy, M)
+    expl_spline <- .explicit_spline(n, B, est_gam)
+
+    pp <- plot(
+      xx,
+      yy,
+      type = "p",
+      pch = 20,
+      cex = 0.2,
+      col = "black",
+      bg = "black",
+      xlab = xlab,
+      ylab = ylab,
+      main = title
+    )
+    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+    list(
+      smoothing_spline = expl_spline[, , ],
+      smoothing_spline_polynomial = pL,
+      est_gamma = est_gam,
+      aux_BF = BF,
+      aux_A = A,
+      aux_tridiag_inverse = Tau,
+      aux_M = M
+    )
+  }

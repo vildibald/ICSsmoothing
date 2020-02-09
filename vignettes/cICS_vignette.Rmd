@@ -1,0 +1,218 @@
+---
+title: "Interpolating cubic splines and data smoothing"
+# author: "Juraj Hudák, Viliam Kačala, Csaba Török"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The package is result of my research collaboration with Csaba Török (associate professor from Institute of Informatics, Faculty of Science, Pavol Jozef Šafárik University in Košice, Slovakia) that will soon appear as paper with title *On Interpolating cubic splines and data smoothing*.
+
+## Package Info:
+
+The main purpose of ICSsmoothing package is to give an alternative way of data smoothing, based on clamped interpolating cubic spline. Smoothing by interpolating splines was not done before, therefore we aimed to rectify that state. For smoothing purpose, one can use either uniform (knots are equidistant) or non-uniform spline (knots are arbitrary).
+
+```{r}
+library(ICSsmoothing)
+```
+
+## Examples of essential functions:
+
+* \( \mathbf{unif\_explicit\_cICS} \)
+
+Let $P=\{[-1,2],[0,3],[1,-2],[2,6]\}$, which means we have equidistant knots $(-1,0,1,2)^{\mathsf{T}}$ and function values $(2,3,-2,6)^{\mathsf{T}}$. Let values of derivative in the first and the last knot be $1$ and $4$, respectively. We will construct the explicit form of uniform clamped cubic interpolating spline $\mathbf{S}$, that is
+$$\mathbf{S}=\mathbf{B}\cdot\boldsymbol{\gamma},$$
+where $\boldsymbol{\gamma}=(2,3,-2,6,1,4)^{\mathsf{T}}.$
+```{r fig.width=5, fig.height=3}
+uu<-c(-1,0,1,2)
+yy<-c(2,3,-2,6)
+d<-c(1,4)
+clrs<-c("blue","red")
+expl_spline<-ICSsmoothing::unif_explicit_cICS(uu,yy,d,clrs)
+```
+```{r}
+expl_spline$spline
+expl_spline$spline_toPolynomial
+expl_spline$B
+expl_spline$gama
+```
+Hence
+\begin{align*}
+\mathbf{S}=\begin{pmatrix}
+3 - 3.8x - 9.6x^2 - 4.8x^3\\
+3 - 3.8x - 9.6x^2 + 8.4x^3\\
+21.2 - 58.4x + 45x^2 - 9.8x^3
+\end{pmatrix}=\mathbf{B}\cdot \boldsymbol{\gamma},
+\end{align*}
+where
+
+\begin{align*}
+\mathbf{B}^{\mathsf{T}}&=\left(\begin{smallmatrix}
+-0.8x+1.4x^2+1.2x^3 & -0.8x+1.4x^2-0.6x^3 & -0.8+1.6x-x^2+0.2x^3\\
+1+0.2x-2.6x^2-1.8x^3 & 1+0.2x-2.6x^2+1.4x^3 & 3.2-6.4x+4x^2-0.8x^3\\
+0.8x+1.6x^2+0.8x^3 & 0.8x+1.6x^2-1.4x^3 & -3.2+10.4x-8x^2+1.8x^3\\
+-0.2x-0.4x^2-0.2x^3 & -0.2x-0.4x^2+0.6x^3 & 1.8-5.6x+5x^2-1.2x^3\\
+-0.2\overline{6}x+0.4\overline{6}x^2+0.7\overline{3}x^3 & -0.2\overline{6}x+0.4\overline{6}x^2-0.2x^3 & -0.2\overline{6}+0.5\overline{3}x-0.\overline{3}x^2+0.0\overline{6}x^3\\ 
+0.0\overline{6}x+0.1\overline{3}x^2+0.0\overline{6}x^3 & 0.0\overline{6}x+0.1\overline{3}x^2-0.2x^3 & -0.9\overline{3}+2.8\overline{6}x-2.\overline{6}x^2+0.7\overline{3}x^3 
+\end{smallmatrix}\right),\\
+\boldsymbol{\gamma}&=(2,3,-2,6,1,4)^{\mathsf{T}}.
+\end{align*}
+
+* $\mathbf{nonunif\_explicit\_cICS}$
+
+The use is analogous to *unif_explicit_cICS*, only knots can be arbitrary.
+
+* $\mathbf{smooth\_by\_unif\_explicit\_cICS}$
+
+Our data set consists of 1000 generated values of *sin* function with added white noise. We would like to smooth it by $10$-component uniform clamped cubic interpolating spline.
+
+```{r, fig.width=7, fig.height=4}
+N<-1000
+xx<-c(-5,sort(runif(N-2,-5,10)),10)
+yy<-c(sin(xx))+c(rnorm(N,0,0.2))
+clrs<-c("blue","red")
+k<-10
+result_unif<-smooth_by_unif_explicit_cICS(xx,yy,k,clrs)
+```
+
+Particular components of the smoothing spline are:
+```{r}
+result_unif$smoothing_spline
+result_unif$smoothing_spline_toPolynomial
+```
+
+* $\mathbf{smooth\_by\_nonunif\_explicit\_cICS}$
+
+This time, our data set consists of 500 generated values of *exp* function on [0,5] with added white noise. We would like to smooth it by $7$-component non-uniform clamped cubic interpolating spline, with spline knots $(0,2,3,3.5,4,4.5,4.75,5)^{\mathsf{T}}$.
+
+```{r, fig.width=7, fig.height=4}
+N<-500
+xx<-c(0,sort(runif(N-2,0,5)),5)
+yy<-c(exp(xx))+c(rnorm(N,0,3))
+uu<-c(0,2,3,3.5,4,4.5,4.75,5)
+clrs<-c("blue","red")
+k<-7
+result_nonunif<-smooth_by_nonunif_explicit_cICS(xx,yy,k,uu,clrs)
+```
+
+Particular components of the smoothing spline are:
+```{r}
+result_nonunif$smoothing_spline
+result_nonunif$smoothing_spline_toPolynomial
+```
+
+### Smoothing spline with chosen exterior-knot derivatives:
+
+Lets consider given data of 144 monthly measured number of sold airpasses. If we construct $24$-component smoothing cICS, we may observe that function in last component of spline does not stop decreasing, therefore it is impractical at potential prediction. 
+
+```{r fig.width=7, fig.height=4}
+yy<-c(get(load(paste(getwd(),"/data/data_airpasses.rda",sep="")))$X1)
+xx<-c(1:length(yy))
+k<-24
+clrs=c("blue","red")
+result_airpasses<-smooth_by_unif_explicit_cICS(xx,yy,k,clrs)
+```
+
+Estimated derivatives are
+```{r}
+c(result_airpasses$est_gamma)[(k+2):(k+3)]
+```
+
+We can get around this by forcibly selecting values of these exterior-knot derivatives, by including optional parameter *d* in functions *smooth_by_unif_explicit_cICS* or *smooth_by_nonunif_explicit_cICS*, like this:
+
+```{r fig.width=7, fig.height=4}
+yy<-c(get(load(paste(getwd(),"/data/data_airpasses.rda",sep="")))$X1)
+xx<-c(1:length(yy))
+k<-24
+clrs=c("blue","red")
+d<-c(1.2,10)
+result_airpasses<-smooth_by_unif_explicit_cICS(xx,yy,k,clrs,d)
+```
+
+## Supplementary functions - theoretical basics:
+
+* $\mathbf{tridiag\_inv\_general}$
+
+For computing the inverse matrix of a general tridiagonal matrix in form
+\begin{align*}
+\mathbf{T}_n(\mathbf{a},\mathbf{b},\mathbf{c})=\begin{pmatrix}
+b_1 & c_1 & 0 &\dots & 0\\
+a_1 & b_2 & c_1 & \dots & 0\\
+0 & a_2 & b_3 & \ddots & 0\\
+0 & 0 & \ddots & \ddots & c_{n-1}\\
+0 & 0 & \dots & a_{n-1} & b_n\\
+\end{pmatrix},
+\end{align*}
+by applying Usmani's theorem:
+
+Let $\mathbf{T}=\mathbf{T}_n(\mathbf{a},\mathbf{b},\mathbf{c})\in \mathbb{R}^{n\times n}$, given by \eqref{tridiag}, be a regular tridiagonal matrix and let $\mathbf{T}^{-1}=(\tau_{i,j})_{n\times n}$. Then
+		\begin{align*}
+		\tau_{i,j}=\left\{
+		\begin{array}{lll}
+		(-1)^{i+j}c_{i}c_{i+1}\dots c_{j-1}\frac{\theta_{i-1}\phi_{j+1}}{\theta_n}, & \quad i<j,\\
+		(-1)^{i+j}a_{j}a_{j+1}\dots a_{i-1}\frac{\theta_{j-1}\phi_{i+1}}{\theta_n}, & \quad i>j,\\
+		\frac{\theta_{i-1}\phi_{i+1}}{\theta_n}, & \quad i=j,
+		\end{array}
+		\right.
+		\end{align*}
+		where
+		\begin{align*}
+		\theta_0&=1,\ \theta_1=b_1,\ \theta_i=b_{i}\theta_{i-1}-a_{i-1}c_{i-1}\theta_{i-2},\ i=2,3,\dots,n;\\
+		\phi_{n+1}&=1,\ \phi_n=b_n,\ \phi_j=b_{j}\phi_{j+1}-a_{j}c_{j}\phi_{j+2},\ j=n-1,n-2,\dots,1.
+		\end{align*}
+
+* $\mathbf{tridiag\_inv\_unif\_by\_sums}$
+
+For computing the inverse matrix of a tridiagonal matrix in form
+$$
+\mathbf{T}_{n}(a,b,a)=\begin{pmatrix}
+b & a & 0 &\dots & 0\\
+a & b & a & \dots & 0\\
+0 & a & b & \ddots & 0\\
+0 & 0 & \ddots & \ddots & a\\
+0 & 0 & \dots & a & b\\
+\end{pmatrix}
+$$
+The algoritm uses theorem by Usmani (T1), combined with our own theorem (T2).
+
+(T1)
+Let $\mathbf{T}=\mathbf{T}_{n}(a,b,a)\in \mathbb{R}^{n\times n}$ be a regular tridiagonal matrix, $\mathbf{T}^{-1}=(\tau_{i,j})_{n\times n}$. Then
+		\begin{align}
+		\tau_{i,j}=\left\{
+		\begin{array}{ll}
+		(-1)^{i+j}a^{j-i}\frac{D_{i-1}D_{n-j}}{D_{n}}, & \quad i\leq j,\\
+		(-1)^{i+j}a^{i-j}\frac{D_{j-1}D_{n-i}}{D_{n}}, & \quad i>j,\\
+		\end{array}
+		\right.
+		\end{align}
+		for $D_{0}=1$ and $D_{k}=\mathrm{det}\mathbf{T}_{k}(a,b,c),\ k=1,2,\dots,n$.
+
+(T2)
+Let $\mathbf{T}=\mathbf{T}_{n}(a,b,a)\in \mathbb{R}^{n\times n},\ n\geq 3,$ be a regular matrix and let $\mathbf{T}^{-1}=(\tau_{i,j}^{(n)})_{n\times n}$. If $i\leq j<n$ and $n-i\leq j$, then
+		\begin{align*}
+		\tau_{i,j}^{(n)}=\tau_{i+1,j+1}^{(n)}+\tau_{i-n+j,n}^{(n)}.
+		\end{align*}
+
+* $\mathbf{hermite\_bf\_matrix}$
+
+One-component Hermite cubic spline, built for knots $u,v$, function values $y_u,y_v$ and derivatives $d_u,d_v$ has form
+\begin{align*}
+s(x)&=y_{u}\frac{(x-v)^2}{(u-v)^2}\left(1-2\frac{x-u}{u-v}\right)+y_{v}\frac{(x-u)^2}{(v-u)^2}\left(1-2\frac{x-v}{v-u}\right)+\\
+&+d_{u}\frac{(x-v)^2}{(u-v)^2}(x-u)+d_{v}\frac{(x-u)^2}{(v-u)^2}(x-v).
+\end{align*}
+
+The function returns matrix $\mathbf{H}(u,v)$ from matrix representation of $s(x)$, that is:
+\begin{align*}
+s(x)=(1,x,x^2,x^3)\cdot \mathbf{H}(u,v)\cdot (y_u,y_{v},d_u,d_{v})^\mathsf{T},
+\end{align*} where
+\begin{align*}
+\mathbf{H}(u,v)=\frac{1}{(v-u)^3}\begin{pmatrix}
+-3uv^2+v^3 & 3u^2v-u^3 & -uv^2(v-u) & -u^2v(v-u)\\
+6uv & -6uv & (2uv+v^2)(v-u) & (2uv+u^2)(v-u)\\
+-3(u+v) & 3(u+v) & (-2v-u)(v-u) & (-2u-v)(v-u)\\
+2 & -2 & v-u & v-u\\
+\end{pmatrix}.
+\end{align*}
