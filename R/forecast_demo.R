@@ -199,7 +199,7 @@ forcastY1234 = function(uu,xx,yy,se,sp, dd,plotAllTF=TRUE
     points(uUp,yUp,pch=0,col='magenta')
     ### b) Bottom points - from j by k
     #???:
-    points(uBo,yBo,pch=0,col='orange')
+    points(uBo,yBo,pch=0,col='green')
 
     ### Upper
     #abline(rUp,col='magenta')
@@ -208,7 +208,7 @@ forcastY1234 = function(uu,xx,yy,se,sp, dd,plotAllTF=TRUE
     #abline(rBo,col='black')
     #lines(uBo,yBe,col='green')
     lines(uu3,yy3,pch=0,col='magenta')
-    lines(uu4,yy4,pch=0,col='orange')
+    lines(uu4,yy4,pch=0,col='green')
 
     ### a) Plot derivatives of spline components:
     title('Extrapolating upper and bottom function values')
@@ -220,7 +220,7 @@ forcastY1234 = function(uu,xx,yy,se,sp, dd,plotAllTF=TRUE
     }
     #points(u2,y2,col='green',pch=15)
     points(u3,y3,col='magenta',pch=15)
-    points(u4,y4,col='orange',pch=15)
+    points(u4,y4,col='green',pch=15)
   }
   y14=c(y1,y2,y3,y4)
   names(y14)=NULL
@@ -266,7 +266,7 @@ forcast2comp = function(uu,xx,yy,se,sp, dd,YY,colors = c("red", "blue"),
   Plot1CompHerSp(u3,u4,25,y3,y4,d3,d4,forecast_color)
 } # end forcast2comp
 
-forcast_Spline = function(xx,yy,k, plotAllTF=FALSE, colors = c("red", "green")
+forcast_Spline = function(xx,yy,k, plotAllTF=FALSE, colors = c("red", "blue")
                           , ...){
   posun=0;
   xy <- list(...); #print(1111111);print(xy)
@@ -308,7 +308,7 @@ forcast_Spline = function(xx,yy,k, plotAllTF=FALSE, colors = c("red", "green")
   ###
   if(! plotAllTF) par(mfrow=c(1,1))
   YY=uY$y14; YY
-  forcast2comp(uu,xx,yy,se,sp, DD,YY,color="green"
+  forcast2comp(uu,xx,yy,se,sp, DD,YY,colors=colors,forecast_color="green"
                ,xlab=xlable,ylab=ylable)
   par(old$par,old$mar)
   return(list(uD=uD,uY=uY))
