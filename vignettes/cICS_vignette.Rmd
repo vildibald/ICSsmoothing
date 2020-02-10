@@ -31,11 +31,11 @@ uu<-c(-1,0,1,2)
 yy<-c(2,3,-2,6)
 d<-c(1,4)
 clrs<-c("blue","red")
-expl_spline<-ICSsmoothing::unif_explicit_cICS(uu,yy,d,clrs)
+expl_spline<-ICSsmoothing::cics_unif_explicit(uu,yy,d,clrs)
 ```
 ```{r}
 expl_spline$spline
-expl_spline$spline_toPolynomial
+expl_spline$spline_polynomial
 expl_spline$B
 expl_spline$gama
 ```
@@ -75,13 +75,13 @@ xx<-c(-5,sort(runif(N-2,-5,10)),10)
 yy<-c(sin(xx))+c(rnorm(N,0,0.2))
 clrs<-c("blue","red")
 k<-10
-result_unif<-smooth_by_unif_explicit_cICS(xx,yy,k,clrs)
+result_unif<-cics_unif_explicit_smooth(xx,yy,k,clrs)
 ```
 
 Particular components of the smoothing spline are:
 ```{r}
 result_unif$smoothing_spline
-result_unif$smoothing_spline_toPolynomial
+result_unif$smoothing_spline_to_polynomial
 ```
 
 * $\mathbf{smooth\_by\_nonunif\_explicit\_cICS}$
@@ -94,14 +94,13 @@ xx<-c(0,sort(runif(N-2,0,5)),5)
 yy<-c(exp(xx))+c(rnorm(N,0,3))
 uu<-c(0,2,3,3.5,4,4.5,4.75,5)
 clrs<-c("blue","red")
-k<-7
-result_nonunif<-smooth_by_nonunif_explicit_cICS(xx,yy,k,uu,clrs)
+result_nonunif<-cics_explicit_smooth(xx,yy,uu,clrs)
 ```
 
 Particular components of the smoothing spline are:
 ```{r}
 result_nonunif$smoothing_spline
-result_nonunif$smoothing_spline_toPolynomial
+result_nonunif$smoothing_spline_polynomial
 ```
 
 ### Smoothing spline with chosen exterior-knot derivatives:
@@ -113,7 +112,7 @@ yy<-c(get(load(paste(getwd(),"/data/data_airpasses.rda",sep="")))$X1)
 xx<-c(1:length(yy))
 k<-24
 clrs=c("blue","red")
-result_airpasses<-smooth_by_unif_explicit_cICS(xx,yy,k,clrs)
+result_airpasses<-cics_unif_explicit_smooth(xx,yy,k,clrs)
 ```
 
 Estimated derivatives are
@@ -129,7 +128,7 @@ xx<-c(1:length(yy))
 k<-24
 clrs=c("blue","red")
 d<-c(1.2,10)
-result_airpasses<-smooth_by_unif_explicit_cICS(xx,yy,k,clrs,d)
+result_airpasses<-cics_unif_explicit_smooth(xx,yy,k,clrs,d)
 ```
 
 ## Supplementary functions - theoretical basics:
