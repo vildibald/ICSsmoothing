@@ -55,8 +55,8 @@ cics_explicit_smooth(c(0,sort(runif(98, 0, 1)),1),c(rnorm(100, 0, 0.01)),
 c(0,sort(runif(9,0,1)),1),c('blue','red'))
 
 cics_explicit_smooth(
-xx = CERN[,1],
-yy = CERN[,2],
+xx = CERN$x,
+yy = CERN$y,
 d = c(0, 1),
 uu = c(1, sort(runif(20,1,277)), 277),
 xlab = "X axis",

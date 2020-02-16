@@ -5,7 +5,8 @@
 \title{Construct the explicit form of uniform clamped interpolating cubic spline (UcICS).}
 \usage{
 cics_unif_explicit(
-  uu,
+  uumin,
+  uumax,
   yy,
   d,
   clrs = c("blue", "red"),
@@ -15,7 +16,9 @@ cics_unif_explicit(
 )
 }
 \arguments{
-\item{uu}{a vector of equidistant knots (ordered ascendingly), with magnitude \code{n+2}, \code{n}\eqn{\ge}\code{1}.}
+\item{uumin}{a starting knot.}
+
+\item{uumax}{an ending knot.}
 
 \item{yy}{a vector of function values pertaining to knots in \code{uu}.}
 
@@ -46,6 +49,13 @@ and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.
 }
 \examples{
 
-cics_unif_explicit(CERN$x,CERN$y,c(0,0), xlab="X axis", ylab="Y axis")
+cics_unif_explicit(
+head(CERN$x, n=1),
+tail(CERN$x, n=1),
+CERN$y,
+c(0,0),
+xlab="X axis",
+ylab="Y axis"
+)
 
 }

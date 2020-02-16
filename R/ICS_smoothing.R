@@ -4,8 +4,10 @@ library(polynom)
   result <- array(0, n + 1)
   result[1] = 1
   result[2] = b
-  for (i in 3:(n + 1)) {
-    result[i] <- (b * result[i - 1]) - (a * a * result[i - 2])
+  if(n > 1){
+    for (i in 3:(n + 1)) {
+      result[i] <- (b * result[i - 1]) - (a * a * result[i - 2])
+    }
   }
   return(result)
 }
@@ -227,49 +229,49 @@ hermite_bf_matrix <- function(u, v) {
   vec_mat <- .basis_matrices(n, uu)
   BF <- array(dim = c(n + 1, 4, 4))
   for (i in 1:(n + 1)) {
-    BF[i, 1, ] <- vec_mat[, , i][, 1]
-    BF[i, 2, ] <- vec_mat[, , i][, 2]
-    BF[i, 3, ] <- vec_mat[, , i][, 3]
-    BF[i, 4, ] <- vec_mat[, , i][, 4]
+    BF[i, 1,] <- vec_mat[, , i][, 1]
+    BF[i, 2,] <- vec_mat[, , i][, 2]
+    BF[i, 3,] <- vec_mat[, , i][, 3]
+    BF[i, 4,] <- vec_mat[, , i][, 4]
   }
   return (BF)
 }
 
 .uniform_auxiliary_matrix_b <- function(n, A, BF) {
   B <- array(dim = c(n + 1, n + 4, 4))
-  B[1, 1, ] <- BF[1, 1, ] + (A[1, 1] * BF[1, 4, ])
-  B[1, 2, ] <- BF[1, 2, ] + (A[1, 2] * BF[1, 4, ])
+  B[1, 1,] <- BF[1, 1,] + (A[1, 1] * BF[1, 4,])
+  B[1, 2,] <- BF[1, 2,] + (A[1, 2] * BF[1, 4,])
   for (i in 3:(n + 2)) {
-    B[1, i, ] <- A[1, i] * BF[1, 4, ]
+    B[1, i,] <- A[1, i] * BF[1, 4,]
   }
-  B[1, n + 3, ] <- BF[1, 3, ] + (A[1, n + 3] * BF[1, 4, ])
-  B[1, n + 4, ] <- A[1, n + 4] * BF[1, 4, ]
+  B[1, n + 3,] <- BF[1, 3,] + (A[1, n + 3] * BF[1, 4,])
+  B[1, n + 4,] <- A[1, n + 4] * BF[1, 4,]
   if (n >= 2) {
     for (i in 2:n) {
       for (j in 1:(n + 4)) {
         if (i == j) {
-          B[i, j, ] <- BF[i, 1, ] + A[i - 1, j] * BF[i,
-                                                     3, ] + A[i, j] * BF[i, 4, ]
+          B[i, j,] <- BF[i, 1,] + A[i - 1, j] * BF[i,
+                                                   3,] + A[i, j] * BF[i, 4,]
         } else if (i == j - 1) {
-          B[i, j, ] <- BF[i, 2, ] + A[i - 1, j] * BF[i,
-                                                     3, ] + A[i, j] * BF[i, 4, ]
+          B[i, j,] <- BF[i, 2,] + A[i - 1, j] * BF[i,
+                                                   3,] + A[i, j] * BF[i, 4,]
         } else {
-          B[i, j, ] <- A[i - 1, j] * BF[i, 3, ] + A[i,
-                                                    j] * BF[i, 4, ]
+          B[i, j,] <- A[i - 1, j] * BF[i, 3,] + A[i,
+                                                  j] * BF[i, 4,]
         }
       }
     }
   }
   for (i in 1:n) {
-    B[n + 1, i, ] <- A[n, i] * BF[n + 1, 3, ]
+    B[n + 1, i,] <- A[n, i] * BF[n + 1, 3,]
   }
-  B[n + 1, n + 1, ] <- BF[n + 1, 1, ] + A[n, n + 1] * BF[n +
-                                                           1, 3, ]
-  B[n + 1, n + 2, ] <- BF[n + 1, 2, ] + A[n, n + 2] * BF[n +
-                                                           1, 3, ]
-  B[n + 1, n + 3, ] <- A[n, n + 3] * BF[n + 1, 3, ]
-  B[n + 1, n + 4, ] <- BF[n + 1, 4, ] + A[n, n + 4] * BF[n +
-                                                           1, 3, ]
+  B[n + 1, n + 1,] <- BF[n + 1, 1,] + A[n, n + 1] * BF[n +
+                                                         1, 3,]
+  B[n + 1, n + 2,] <- BF[n + 1, 2,] + A[n, n + 2] * BF[n +
+                                                         1, 3,]
+  B[n + 1, n + 3,] <- A[n, n + 3] * BF[n + 1, 3,]
+  B[n + 1, n + 4,] <- BF[n + 1, 4,] + A[n, n + 4] * BF[n +
+                                                         1, 3,]
   return(B)
 }
 
@@ -278,9 +280,9 @@ hermite_bf_matrix <- function(u, v) {
   for (i in 1:(n + 1)) {
     pom <- array(0, c(1, 1, 4))
     for (j in 1:(n + 4)) {
-      pom <- pom + gamma[j] * B[i, j, ]
+      pom <- pom + gamma[j] * B[i, j,]
     }
-    expl_spline[i, 1, ] <- pom
+    expl_spline[i, 1,] <- pom
   }
   return (expl_spline)
 }
@@ -291,7 +293,7 @@ hermite_bf_matrix <- function(u, v) {
     pL[[j]] <- 1 + pL[[j - 1]]
   class(pL) <- "polylist"
   for (i in 1:(n + 1)) {
-    pL[[i]] <- polynomial(coef = c(expl_spline[i, 1, ]))
+    pL[[i]] <- polynomial(coef = c(expl_spline[i, 1,]))
     frb = ifelse(i %% 2 == 0, clrs[2], clrs[1])
     lines(pL[[i]], xlim = c(uu[i], uu[i + 1]), col = frb)
   }
@@ -304,7 +306,8 @@ hermite_bf_matrix <- function(u, v) {
 #' (via Hermite cubic spline) for knots \code{uu}, function values \code{yy} and exterior-knot derivatives
 #' \code{d}.
 #'
-#' @param uu a vector of equidistant knots (ordered ascendingly), with magnitude \code{n+2}, \code{n}\eqn{\ge}\code{1}.
+#' @param uumin a starting knot.
+#' @param uumax an ending knot.
 #' @param yy a vector of function values pertaining to knots in \code{uu}.
 #' @param d a vector of two values of derivative, in the first and the last knot of \code{uu}.
 #' @param clrs a vector (optional parameter) of colours that are used alternately to plot the graph of spline's components.
@@ -321,7 +324,14 @@ hermite_bf_matrix <- function(u, v) {
 #'  takes part in the explicit form \eqn{S=B.\gamma}.}
 #' @examples
 #'
-#' cics_unif_explicit(CERN$x,CERN$y,c(0,0), xlab="X axis", ylab="Y axis")
+#' cics_unif_explicit(
+#' head(CERN$x, n=1),
+#' tail(CERN$x, n=1),
+#' CERN$y,
+#' c(0,0),
+#' xlab="X axis",
+#' ylab="Y axis"
+#' )
 #'
 #' @export
 #' @importFrom grDevices colours
@@ -329,40 +339,34 @@ hermite_bf_matrix <- function(u, v) {
 #' @importFrom graphics lines
 #' @import polynom
 cics_unif_explicit <-
-  function(uu,
+  function(uumin,
+           uumax,
            yy,
            d,
            clrs = c('blue', 'red'),
            xlab = NULL,
            ylab = NULL,
            title = "Spline") {
-    if (is.unsorted(uu)) {
-      stop("Knots are not in increasing order!")
+    if (uumin >= uumax) {
+      stop("uumin must be smaller than uumax")
     }
-    if (length(uu) != length(yy)) {
-      stop("Lengths of knot sequence and
-                  sequence of function values differ!")
-    }
-    if (length(uu) <= 2) {
+
+    if (length(yy) <= 2) {
       stop("There are not at least 3 knots.")
     }
-    dist <- (uu[length(uu)] - uu[1]) / (length(uu) - 1)
-    for (i in 1:(length(uu) - 1)) {
-      if (!all.equal(uu[i + 1] - uu[i], dist)) {
-        stop("Knots are not equidistant!")
-      }
-    }
+    n <- length(yy) - 2
+    dist <- (uumax - uumin) / (n + 1)
     if (length(d) != 2) {
       stop("d isn't of length 2.")
     }
     if (!all(clrs %in% colours())) {
       stop("Not every string in clrs represents a colour!")
     }
-    n <- length(uu) - 2
+
     gam <- c(yy, d)
     Tau <- tridiag_inv_unif_by_sums(n, 1, 4)
-    h <- (uu[length(uu)] - uu[1]) / (n + 1)
-
+    h <- dist
+    uu <- c(seq(uumin, uumax, length.out = length(yy)))
     A <- .uniform_auxiliary_matrix_a(n, h, Tau)
     BF <- .basis_functions(n, uu)
     B <- .uniform_auxiliary_matrix_b(n, A, BF)
@@ -384,7 +388,7 @@ cics_unif_explicit <-
     pL <- .create_polynomial(n, uu, expl_spline, clrs)
 
     list(
-      spline = expl_spline[, , ],
+      spline = expl_spline[, ,],
       spline_polynomial = pL,
       B = B,
       gamma = gam,
@@ -414,7 +418,7 @@ cics_unif_explicit <-
   M <- matrix(0, lngth, k + 3)
   for (i in 1:lngth) {
     for (j in 1:(k + 3)) {
-      sup_poly <- B[xx_idx[i], j, ]
+      sup_poly <- B[xx_idx[i], j,]
       M[i, j] <- sup_poly[1] + sup_poly[2] * xx[i] + sup_poly[3] *
         (xx[i]) ^ 2 + sup_poly[4] * (xx[i]) ^ 3
     }
@@ -541,7 +545,7 @@ cics_unif_explicit_smooth <-
 
     list(
       knots = uu,
-      smoothing_spline = expl_spline[, , ],
+      smoothing_spline = expl_spline[, ,],
       smoothing_spline_polynomial = pL,
       est_gamma = est_gam,
       B = B,
@@ -685,7 +689,7 @@ cics_explicit <-
     pL <- .create_polynomial(n, uu, expl_spline, clrs)
 
     list(
-      spline = expl_spline[, , ],
+      spline = expl_spline[, ,],
       spline_polynomial = pL,
       B = B,
       gama = gam,
@@ -725,8 +729,8 @@ cics_explicit <-
 #' c(0,sort(runif(9,0,1)),1),c('blue','red'))
 #'
 #' cics_explicit_smooth(
-#' xx = CERN[,1],
-#' yy = CERN[,2],
+#' xx = CERN$x,
+#' yy = CERN$y,
 #' d = c(0, 1),
 #' uu = c(1, sort(runif(20,1,277)), 277),
 #' xlab = "X axis",
@@ -742,7 +746,7 @@ cics_explicit_smooth <-
            yy,
            uu,
            clrs = c('blue', 'red'),
-           d ,
+           d,
            xlab = NULL,
            ylab = NULL,
            title = "Spline") {
@@ -793,7 +797,7 @@ cics_explicit_smooth <-
     )
     pL <- .create_polynomial(n, uu, expl_spline, clrs)
     list(
-      smoothing_spline = expl_spline[, , ],
+      smoothing_spline = expl_spline[, ,],
       smoothing_spline_polynomial = pL,
       est_gamma = est_gam,
       aux_BF = BF,

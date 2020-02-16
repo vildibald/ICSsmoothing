@@ -9,7 +9,7 @@ test_that("cics_unif_explicit works correctly.", {
   yy <- c(runif(n + 2, -20, 20))
   d <- c(runif(2, -20, 20))
   clrs <- c(sample(colours(), 2))
-  exp_sp <- cics_unif_explicit(uu, yy, d, clrs)
+  exp_sp <- cics_unif_explicit(a, b, yy, d, clrs)
   fl <- rep(0, n)
   fr <- rep(0, n)
   dl <- rep(0, n)
