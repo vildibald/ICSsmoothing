@@ -1,4 +1,5 @@
 library(polynom)
+library(ggplot2)
 
 .tridiagonal_determinant <- function(n, a, b) {
   result <- array(0, n + 1)
@@ -287,17 +288,21 @@ hermite_bf_matrix <- function(u, v) {
   return (expl_spline)
 }
 
-.create_polynomial <- function(n, uu, expl_spline, clrs) {
+.create_polynomial <- function(n, uu, expl_spline, clrs, pp) {
   pL <- list(polynomial(1))
   for (j in 2:(n + 1))
     pL[[j]] <- 1 + pL[[j - 1]]
   class(pL) <- "polylist"
+
   for (i in 1:(n + 1)) {
     pL[[i]] <- polynomial(coef = c(expl_spline[i, 1,]))
     frb = ifelse(i %% 2 == 0, clrs[2], clrs[1])
-    lines(pL[[i]], xlim = c(uu[i], uu[i + 1]), col = frb)
+
+    fnc=as.function(pL[[i]])
+    pp = pp + stat_function(fun = fnc, color=frb, xlim = c(uu[i], uu[i + 1]))
+    #lines(pL[[i]], xlim = c(uu[i], uu[i + 1]), col = frb)
   }
-  return (pL)
+  return (list(pL = pL, pp = pp))
 }
 
 #' Construct the explicit form of uniform clamped interpolating cubic spline (UcICS).
@@ -372,20 +377,18 @@ cics_unif_explicit <-
     B <- .uniform_auxiliary_matrix_b(n, A, BF)
     expl_spline <- .explicit_spline(n, B, gam)
 
-    pp <-
-      plot(
-        uu,
-        yy,
-        type = "p",
-        pch = 20,
-        col = "black",
-        bg = "black",
-        xlab = xlab,
-        ylab = ylab,
-        main = title
-      )
+    df <- data.frame(x = uu, y = yy)#do.call(rbind, Map(data.frame, x=uu, y=yy)),
+    pp = ggplot(
+      df,
+      aes(x, y)
+    ) + xlab(xlab) + ylab(ylab)
 
-    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+    pp = pp + geom_point(data = df)
+    pol <- .create_polynomial(n, uu, expl_spline, clrs, pp)
+
+    pL <- pol$pL
+    pp <- pol$pp
+    print(pp)
 
     list(
       spline = expl_spline[, ,],
@@ -528,20 +531,19 @@ cics_unif_explicit_smooth <-
     est_gam <- .estimate_gamma(k, d, yy, M)
     expl_spline <- .explicit_spline(n, B, est_gam)
 
-    pp <- plot(
-      xx,
-      yy,
-      type = "p",
-      pch = 20,
-      cex = 0.2,
-      col = "black",
-      bg = "black",
-      xlab = xlab,
-      ylab = ylab,
-      main = title
-    )
+    df <- data.frame(x = xx, y = yy)#do.call(rbind, Map(data.frame, x=xx, y=yy)),
 
-    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+    pp = ggplot(
+      df,
+      aes(x, y)
+    ) + xlab(xlab) + ylab(ylab)
+
+    pp = pp + geom_point(data = df, size=1, alpha = 0.2)
+    pol <- .create_polynomial(n, uu, expl_spline, clrs, pp)
+
+    pL <- pol$pL
+    pp <- pol$pp
+    print(pp)
 
     list(
       knots = uu,
@@ -674,19 +676,18 @@ cics_explicit <-
     B <- .uniform_auxiliary_matrix_b(n, A, BF)
     expl_spline <- .explicit_spline(n, B, gam)
 
-    pp <-
-      plot(
-        uu,
-        yy,
-        type = "p",
-        pch = 20,
-        col = "black",
-        bg = "black",
-        xlab = xlab,
-        ylab = ylab,
-        main = title
-      )
-    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+    df <- data.frame(x = uu, y = yy)#do.call(rbind, Map(data.frame, x=uu, y=yy)),
+    pp = ggplot(
+      df,
+      aes(x, y)
+    ) + xlab(xlab) + ylab(ylab)
+
+    pp = pp + geom_point(data = df)
+    pol <- .create_polynomial(n, uu, expl_spline, clrs, pp)
+
+    pL <- pol$pL
+    pp <- pol$pp
+    print(pp)
 
     list(
       spline = expl_spline[, ,],
@@ -783,19 +784,20 @@ cics_explicit_smooth <-
     est_gam <- .estimate_gamma(k, d, yy, M)
     expl_spline <- .explicit_spline(n, B, est_gam)
 
-    pp <- plot(
-      xx,
-      yy,
-      type = "p",
-      pch = 20,
-      cex = 0.2,
-      col = "black",
-      bg = "black",
-      xlab = xlab,
-      ylab = ylab,
-      main = title
-    )
-    pL <- .create_polynomial(n, uu, expl_spline, clrs)
+    df <- data.frame(x = xx, y = yy)#do.call(rbind, Map(data.frame, x=xx, y=yy)),
+
+    pp = ggplot(
+      df,
+      aes(x, y)
+    ) + xlab(xlab) + ylab(ylab)
+
+    pp = pp + geom_point(data = df, size=1, alpha = 0.2)
+    pol <- .create_polynomial(n, uu, expl_spline, clrs, pp)
+
+    pL <- pol$pL
+    pp <- pol$pp
+    print(pp)
+
     list(
       smoothing_spline = expl_spline[, ,],
       smoothing_spline_polynomial = pL,
