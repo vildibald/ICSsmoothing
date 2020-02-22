@@ -340,8 +340,7 @@ hermite_bf_matrix <- function(u, v) {
 #'
 #' @export
 #' @importFrom grDevices colours
-#' @importFrom graphics plot
-#' @importFrom graphics lines
+#' @import ggplot2
 #' @import polynom
 cics_unif_explicit <-
   function(uumin,
@@ -491,8 +490,7 @@ cics_unif_explicit <-
 #'
 #' @export
 #' @importFrom grDevices colours
-#' @importFrom graphics plot
-#' @importFrom graphics lines
+#' @import ggplot2
 #' @import polynom
 cics_unif_explicit_smooth <-
   function(xx,
@@ -637,8 +635,7 @@ cics_unif_explicit_smooth <-
 #' cics_explicit(CERN[,1],CERN[,2], d=c(0,-2), xlab="X axis", ylab="Y axis")
 #' @export
 #' @importFrom grDevices colours
-#' @importFrom graphics plot
-#' @importFrom graphics lines
+#' @import ggplot2
 #' @import polynom
 cics_explicit <-
   function(uu,
@@ -739,8 +736,7 @@ cics_explicit <-
 #' )
 #' @export
 #' @importFrom grDevices colours
-#' @importFrom graphics plot
-#' @importFrom graphics lines
+#' @import ggplot2
 #' @import polynom
 cics_explicit_smooth <-
   function(xx,

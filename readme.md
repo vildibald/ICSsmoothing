@@ -13,6 +13,7 @@ Building
 ### Depends on R packages
 * devtools
 * roxygen2
+* ggplot2
 
 ### Installation
 If using Windows run in R (or RStudio)
@@ -32,6 +33,9 @@ library(roxygen2)
 install.packages("digest")
 library(digest)
 install.packages("polynom")
+library(polynom)
+install.packages("ggplot2")
+library(ggplot2)
 ```
 In RStudio install this library using top menu button *Build*->*Install and Restart*.
 And use this library as any other

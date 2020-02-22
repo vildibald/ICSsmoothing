@@ -27,11 +27,10 @@ Let $P=\{[-1,2],[0,3],[1,-2],[2,6]\}$, which means we have equidistant knots $(-
 $$\mathbf{S}=\mathbf{B}\cdot\boldsymbol{\gamma},$$
 where $\boldsymbol{\gamma}=(2,3,-2,6,1,4)^{\mathsf{T}}.$
 ```{r fig.width=5, fig.height=3}
-uu<-c(-1,0,1,2)
 yy<-c(2,3,-2,6)
 d<-c(1,4)
 clrs<-c("blue","red")
-expl_spline<-ICSsmoothing::cics_unif_explicit(uu,yy,d,clrs)
+expl_spline<-ICSsmoothing::cics_unif_explicit(-1,2,yy,d,clrs)
 ```
 ```{r}
 expl_spline$spline
