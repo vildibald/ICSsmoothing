@@ -33,14 +33,16 @@ cics_unif_explicit(
 \item{title}{a title (optional parameter) for the plot.}
 }
 \value{
-a list of spline components
+A list of spline components
 \item{spline}{matrix, whose \code{i}-th row contains coefficients of uniform ICS's \code{i}-th component.}
-\item{spline_toPolynomial}{list of UcICS's components string representations.}
+\item{spline_polynomial}{list of UcICS's components string representations.}
 \item{B}{\code{4}-element array of \code{(n+1)x(n+4)} matrices, whereas element in \code{i}-th row
 and \code{j}-th column of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial that is in \code{i}-th row
 and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.\gamma.}}
 \item{gama}{\eqn{\gamma=} vector of spline coefficients - function values and exterior-knot derivatives that
  takes part in the explicit form \eqn{S=B.\gamma}.}
+\item{aux_BF}{A basis function of the spline}
+\item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 }
 \description{
 \code{cics_unif_explicit} constructs the explicit form of uniform clamped interpolating cubic spline

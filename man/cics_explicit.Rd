@@ -38,6 +38,8 @@ and \code{j}-th column of \code{l}-th matrix contains coefficient by \code{x^{l-
 and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.\gamma.}}
 \item{gama}{\eqn{\gamma=} vector of spline coefficients - function values and exterior-knot derivatives that
  takes part in the explicit form \eqn{S=B.\gamma}.}
+\item{aux_BF}{A basis function of the spline}
+\item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 }
 \description{
 \code{cics_explicit} constructs the explicit form of non-uniform clamped interpolating cubic spline

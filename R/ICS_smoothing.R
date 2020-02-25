@@ -319,14 +319,16 @@ hermite_bf_matrix <- function(u, v) {
 #' @param xlab a title (optional parameter) for the \code{x} axis.
 #' @param ylab a title (optional parameter) for the \code{y} axis.
 #' @param title a title (optional parameter) for the plot.
-#' @return a list of spline components
+#' @return A list of spline components
 #' \item{spline}{matrix, whose \code{i}-th row contains coefficients of uniform ICS's \code{i}-th component.}
-#' \item{spline_toPolynomial}{list of UcICS's components string representations.}
+#' \item{spline_polynomial}{list of UcICS's components string representations.}
 #' \item{B}{\code{4}-element array of \code{(n+1)x(n+4)} matrices, whereas element in \code{i}-th row
 #' and \code{j}-th column of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial that is in \code{i}-th row
 #' and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.\gamma.}}
 #' \item{gama}{\eqn{\gamma=} vector of spline coefficients - function values and exterior-knot derivatives that
 #'  takes part in the explicit form \eqn{S=B.\gamma}.}
+#' \item{aux_BF}{A basis function of the spline}
+#' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' @examples
 #'
 #' cics_unif_explicit(
@@ -395,7 +397,6 @@ cics_unif_explicit <-
       B = B,
       gamma = gam,
       aux_BF = BF,
-      aux_A = A,
       aux_tridiag_inverse = Tau
     )
   }
@@ -470,8 +471,11 @@ cics_unif_explicit <-
 #' \item{smoothing_spline}{\code{4}-element array of \code{(k)x(k+3)} matrices, whereas element in \code{i}-th row and \code{j}-th
 #'  of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial, which is in \code{i}-th row and \code{j}-th column  of matrix
 #' \code{B} from smoothing spline's explicit form \deqn{S=B.\gamma.}}
-#' \item{smoothing_spline_toPolynomial}{list of string representations of smoothing UcICS.}
+#' \item{smoothing_spline_polynomial}{list of string representations of smoothing UcICS.}
 #' \item{est_gamma}{vector of estimated smoothing spline's coefficients (function values and exterior-knot derivatives).}
+#' \item{aux_BF}{A basis function of the spline}
+#' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
+#' \item{aux_M}{An estimation matrix used to compute \code{est_gamma}}
 #' @examples
 #'
 #' cics_unif_explicit_smooth(c(0,sort(runif(18, 0, 1)),1),
@@ -550,7 +554,6 @@ cics_unif_explicit_smooth <-
       est_gamma = est_gam,
       B = B,
       aux_BF = BF,
-      aux_A = A,
       aux_tridiag_inverse = Tau,
       aux_M = M
     )
@@ -628,6 +631,8 @@ cics_unif_explicit_smooth <-
 #' and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.\gamma.}}
 #' \item{gama}{\eqn{\gamma=} vector of spline coefficients - function values and exterior-knot derivatives that
 #'  takes part in the explicit form \eqn{S=B.\gamma}.}
+#' \item{aux_BF}{A basis function of the spline}
+#' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' @examples
 #'
 #' cics_explicit(c(0,2,7),c(4,5,-1),c(0,-2),c('blue','red'))
@@ -692,7 +697,6 @@ cics_explicit <-
       B = B,
       gama = gam,
       aux_BF = BF,
-      aux_A = A,
       aux_tridiag_inverse = Tau
     )
   }
@@ -719,6 +723,9 @@ cics_explicit <-
 #' \code{B} from smoothing spline's explicit form \deqn{S=B.\gamma.}}
 #' \item{smoothing_spline_toPolynomial}{list of string representations of smoothing NcICS.}
 #' \item{est_gamma}{vector of estimated smoothing spline's coefficients (function values and exterior-knot derivatives).}
+#' \item{aux_BF}{A basis function of the spline}
+#' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
+#' \item{aux_M}{An estimation matrix used to compute \code{est_gamma}}
 #' @examples
 #'
 #' cics_explicit_smooth(c(0,sort(runif(28, 0, 1)),1),c(rgamma(30,shape=1)),

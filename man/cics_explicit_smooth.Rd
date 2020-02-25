@@ -41,6 +41,9 @@ a list with components
 \code{B} from smoothing spline's explicit form \deqn{S=B.\gamma.}}
 \item{smoothing_spline_toPolynomial}{list of string representations of smoothing NcICS.}
 \item{est_gamma}{vector of estimated smoothing spline's coefficients (function values and exterior-knot derivatives).}
+\item{aux_BF}{A basis function of the spline}
+\item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
+\item{aux_M}{An estimation matrix used to compute \code{est_gamma}}
 }
 \description{
 \code{cics_explicit_smooth} constructs the non-uniform clamped interpolating spline with \code{k}

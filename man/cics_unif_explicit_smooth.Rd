@@ -40,8 +40,11 @@ a list with components
 \item{smoothing_spline}{\code{4}-element array of \code{(k)x(k+3)} matrices, whereas element in \code{i}-th row and \code{j}-th
  of \code{l}-th matrix contains coefficient by \code{x^{l-1}} of cubic polynomial, which is in \code{i}-th row and \code{j}-th column  of matrix
 \code{B} from smoothing spline's explicit form \deqn{S=B.\gamma.}}
-\item{smoothing_spline_toPolynomial}{list of string representations of smoothing UcICS.}
+\item{smoothing_spline_polynomial}{list of string representations of smoothing UcICS.}
 \item{est_gamma}{vector of estimated smoothing spline's coefficients (function values and exterior-knot derivatives).}
+\item{aux_BF}{A basis function of the spline}
+\item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
+\item{aux_M}{An estimation matrix used to compute \code{est_gamma}}
 }
 \description{
 \code{cics_unif_explicit_smooth} constructs the uniform clamped interpolating spline with \code{k} components that smoothes
