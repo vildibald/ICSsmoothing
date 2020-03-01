@@ -50,7 +50,7 @@ and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.
 \code{d}.
 }
 \examples{
-
+\dontrun{
 cics_unif_explicit(
 head(CERN$x, n=1),
 tail(CERN$x, n=1),
@@ -59,5 +59,5 @@ c(0,0),
 xlab="X axis",
 ylab="Y axis"
 )
-
+}
 }

@@ -330,7 +330,7 @@ hermite_bf_matrix <- function(u, v) {
 #' \item{aux_BF}{A basis function of the spline}
 #' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' @examples
-#'
+#' \dontrun{
 #' cics_unif_explicit(
 #' head(CERN$x, n=1),
 #' tail(CERN$x, n=1),
@@ -339,7 +339,7 @@ hermite_bf_matrix <- function(u, v) {
 #' xlab="X axis",
 #' ylab="Y axis"
 #' )
-#'
+#' }
 #' @export
 #' @importFrom grDevices colours
 #' @import ggplot2
@@ -360,6 +360,7 @@ cics_unif_explicit <-
     if (length(yy) <= 2) {
       stop("There are not at least 3 knots.")
     }
+    x <- y <- NULL
     n <- length(yy) - 2
     dist <- (uumax - uumin) / (n + 1)
     if (length(d) != 2) {
@@ -513,6 +514,7 @@ cics_unif_explicit_smooth <-
     if (k < 2) {
       stop("k is either not greater or equal to 2.")
     }
+    x <- y <- NULL
     lngth <- length(xx)
     n <- k - 1
     uu <- c(seq(xx[1], xx[length(xx)], length.out = k + 1))
@@ -555,7 +557,8 @@ cics_unif_explicit_smooth <-
     )
   }
 
-.nonuniform_tridiagonal_inverse_matrix <- function(n, i, hh) {
+.nonuniform_tridiagonal_inverse_matrix <- function(n, hh) {
+  i <- NULL
   T <- matrix(0, n, n)
   if (n > 1) {
     for (i in 1:(n - 1)) {
@@ -569,7 +572,8 @@ cics_unif_explicit_smooth <-
   return (Tau)
 }
 
-.nonuniform_auxiliary_matrix_a <- function(n, hh, j, i, Tau) {
+.nonuniform_auxiliary_matrix_a <- function(n, hh, Tau) {
+  i <- j <- NULL
   A <- matrix(0, n, n + 4)
   if (n == 1) {
     A[1, 1] <- -3 * hh[2] / (2 * hh[1] * (hh[1] + hh[2]))
@@ -630,8 +634,9 @@ cics_unif_explicit_smooth <-
 #' \item{aux_BF}{A basis function of the spline}
 #' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' @examples
-#'
+#'\dontrun{
 #' cics_explicit(CERN[,1],CERN[,2], d=c(0,-2), xlab="X axis", ylab="Y axis")
+#' }
 #' @export
 #' @importFrom grDevices colours
 #' @import ggplot2
@@ -660,12 +665,13 @@ cics_explicit <-
     if (!all(clrs %in% colours())) {
       stop("Not every string in clrs represents a colour!")
     }
+    x <- y <- NULL
     n <- length(uu) - 2
     hh <- c(uu[2:length(uu)] - uu[1:(length(uu) - 1)])
     gam <- c(yy, d)
-    Tau <- .nonuniform_tridiagonal_inverse_matrix(n, i, hh)
+    Tau <- .nonuniform_tridiagonal_inverse_matrix(n, hh)
 
-    A <- .nonuniform_auxiliary_matrix_a(n, hh, j, i, Tau)
+    A <- .nonuniform_auxiliary_matrix_a(n, hh, Tau)
     vec_mat <- .basis_matrices(n, uu)
 
     BF <- .basis_functions(n, uu)
@@ -759,12 +765,13 @@ cics_explicit_smooth <-
     if (k < 2) {
       stop("k is not greater or equal to 2.")
     }
+    x <- y <- NULL
     lngth <- length(xx)
     n <- length(uu) - 2
     hh <- c(uu[2:length(uu)] - uu[1:(length(uu) - 1)])
-    Tau <- .nonuniform_tridiagonal_inverse_matrix(n, i, hh)
+    Tau <- .nonuniform_tridiagonal_inverse_matrix(n, hh)
 
-    A <- .nonuniform_auxiliary_matrix_a(n, hh, j, i, Tau)
+    A <- .nonuniform_auxiliary_matrix_a(n, hh, Tau)
 
     vec_mat <- .basis_matrices(n, uu)
     BF <- .basis_functions(n, uu)

@@ -52,11 +52,6 @@ a list with components
 }
 \examples{
 
-cics_explicit_smooth(c(0,sort(runif(28, 0, 1)),1),c(rgamma(30,shape=1)),
-c(0,sort(runif(3,0,1)),1),c('green','yellow'))
-cics_explicit_smooth(c(0,sort(runif(98, 0, 1)),1),c(rnorm(100, 0, 0.01)),
-c(0,sort(runif(9,0,1)),1),c('blue','red'))
-
 cics_explicit_smooth(
 xx = CERN$x,
 yy = CERN$y,

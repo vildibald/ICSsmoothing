@@ -1,3 +1,4 @@
+utils::globalVariables(c("AirPassengers"))
 
 #' Forecasting demo using cics_unif_explicit_smooth.
 #'
@@ -10,6 +11,13 @@
 #' @importFrom grDevices colours
 #' @importFrom graphics plot
 #' @importFrom graphics lines
+#' @importFrom graphics arrows
+#' @importFrom graphics par
+#' @importFrom graphics points
+#' @importFrom graphics title
+#' @importFrom stats deriv
+#' @importFrom stats lm
+#' @importFrom stats predict
 #' @import polynom
 #' @import ggplot2
 forecast_demo = function(){

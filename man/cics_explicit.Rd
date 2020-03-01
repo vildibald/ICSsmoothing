@@ -47,8 +47,7 @@ and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.
 \code{d}.
 }
 \examples{
-
-cics_explicit(c(0,2,7),c(4,5,-1),c(0,-2),c('blue','red'))
-cics_explicit(c(-2,-1,3,10,13),c(-5,-4,2,5,2),c(1,-3),c('green','yellow'))
+\dontrun{
 cics_explicit(CERN[,1],CERN[,2], d=c(0,-2), xlab="X axis", ylab="Y axis")
+}
 }

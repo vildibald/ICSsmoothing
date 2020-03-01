@@ -52,10 +52,6 @@ a list with components
 }
 \examples{
 
-cics_unif_explicit_smooth(c(0,sort(runif(18, 0, 1)),1),
-c(rgamma(20,shape=1)),3,c('magenta','orange'))
-cics_unif_explicit_smooth(c(0,sort(runif(98, 0, 15)),15),
-c(rnorm(100, 0, 0.01)),10,c('blue','red'))
 
 cics_unif_explicit_smooth(
 xx = CERN$x,
