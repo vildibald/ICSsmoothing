@@ -11,6 +11,7 @@
 #' @importFrom graphics plot
 #' @importFrom graphics lines
 #' @import polynom
+#' @import ggplot2
 forecast_demo = function(){
 
   forcastD1234 = function(uu,se,sp, plotAllTF=TRUE, colors, ...){

@@ -478,10 +478,6 @@ cics_unif_explicit <-
 #' \item{aux_M}{An estimation matrix used to compute \code{est_gamma}}
 #' @examples
 #'
-#' cics_unif_explicit_smooth(c(0,sort(runif(18, 0, 1)),1),
-#' c(rgamma(20,shape=1)),3,c('magenta','orange'))
-#' cics_unif_explicit_smooth(c(0,sort(runif(98, 0, 15)),15),
-#' c(rnorm(100, 0, 0.01)),10,c('blue','red'))
 #'
 #' cics_unif_explicit_smooth(
 #' xx = CERN$x,
@@ -635,8 +631,6 @@ cics_unif_explicit_smooth <-
 #' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' @examples
 #'
-#' cics_explicit(c(0,2,7),c(4,5,-1),c(0,-2),c('blue','red'))
-#' cics_explicit(c(-2,-1,3,10,13),c(-5,-4,2,5,2),c(1,-3),c('green','yellow'))
 #' cics_explicit(CERN[,1],CERN[,2], d=c(0,-2), xlab="X axis", ylab="Y axis")
 #' @export
 #' @importFrom grDevices colours
@@ -727,11 +721,6 @@ cics_explicit <-
 #' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' \item{aux_M}{An estimation matrix used to compute \code{est_gamma}}
 #' @examples
-#'
-#' cics_explicit_smooth(c(0,sort(runif(28, 0, 1)),1),c(rgamma(30,shape=1)),
-#' c(0,sort(runif(3,0,1)),1),c('green','yellow'))
-#' cics_explicit_smooth(c(0,sort(runif(98, 0, 1)),1),c(rnorm(100, 0, 0.01)),
-#' c(0,sort(runif(9,0,1)),1),c('blue','red'))
 #'
 #' cics_explicit_smooth(
 #' xx = CERN$x,
