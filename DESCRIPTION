@@ -4,9 +4,7 @@ Title: Data Smoothing by Interpolating Cubic Splines
 Version: 1.1.0
 Author: Juraj Hudak
 Maintainer: Viliam Kacala <viliam.kacala@student.upjs.sk>
-Description: We construct the explicit form of clamped cubic interpolating spline (both uniform - knots
-    are equidistant and non-uniform - knots are arbitrary). Using this form, we propose a linear
-    regression model suitable for real data smoothing.
+Description: We construct the explicit form of clamped cubic interpolating spline (both uniform - knots are equidistant and non-uniform - knots are arbitrary). Using this form, we propose a linear regression model suitable for real data smoothing.
 Depends: polynom, ggplot2
 License: GPL-2
 Encoding: UTF-8

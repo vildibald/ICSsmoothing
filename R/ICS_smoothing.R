@@ -332,12 +332,12 @@ hermite_bf_matrix <- function(u, v) {
 #' @examples
 #' \dontrun{
 #' cics_unif_explicit(
-#' head(CERN$x, n=1),
-#' tail(CERN$x, n=1),
-#' CERN$y,
-#' c(0,0),
-#' xlab="X axis",
-#' ylab="Y axis"
+#'   uumin = CERN$x[1],
+#'   uumax = CERN$x[10],
+#'   yy = CERN$y[1:10],
+#'   d = c(0,0), # derivateves at points (CERN$x[1], CERN$y[1]) and (CERN$x[10], CERN$y[10])
+#'   xlab="X axis", # x-axis label
+#'   ylab="Y axis" # y-axis label
 #' )
 #' }
 #' @export
@@ -634,8 +634,14 @@ cics_unif_explicit_smooth <-
 #' \item{aux_BF}{A basis function of the spline}
 #' \item{aux_tridiag_inverse}{An inverse of the tridiagonal matrix used for spline derivatives construction}
 #' @examples
-#'\dontrun{
-#' cics_explicit(CERN[,1],CERN[,2], d=c(0,-2), xlab="X axis", ylab="Y axis")
+#' \dontrun{
+#' cics_explicit(
+#'  uu = c(1, 2.2, 3, 3.8, 7),
+#'  CERN$y[1:5],
+#'  d=c(0,-2),
+#'  xlab="X axis",
+#'  ylab="Y axis"
+#' )
 #' }
 #' @export
 #' @importFrom grDevices colours

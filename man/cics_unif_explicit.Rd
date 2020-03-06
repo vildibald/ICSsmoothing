@@ -52,12 +52,12 @@ and \code{j}-th column of matrix \code{B} from spline's explicit form \deqn{S=B.
 \examples{
 \dontrun{
 cics_unif_explicit(
-head(CERN$x, n=1),
-tail(CERN$x, n=1),
-CERN$y,
-c(0,0),
-xlab="X axis",
-ylab="Y axis"
+  uumin = CERN$x[1],
+  uumax = CERN$x[10],
+  yy = CERN$y[1:10],
+  d = c(0,0), # derivateves at points (CERN$x[1], CERN$y[1]) and (CERN$x[10], CERN$y[10])
+  xlab="X axis", # x-axis label
+  ylab="Y axis" # y-axis label
 )
 }
 }
